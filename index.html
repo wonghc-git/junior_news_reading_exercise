@@ -1,0 +1,1908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Junior News Reading Exercise</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #0f172a;
+  -webkit-overflow-scrolling: touch;
+}
+.no-select {
+  user-select: none;
+}
+/* Custom subtle scrollbar styling */
+.custom-scroll::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.28);
+  border-radius: 9999px;
+}
+/* Custom subtle animations for slide & fade transitions */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(22px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-22px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+.anim-right {
+  animation: slideInRight 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.anim-left {
+  animation: slideInLeft 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.anim-fade {
+  animation: fadeInScale 0.18s ease-out forwards;
+}
+.glossary-word {
+  border-bottom: 1.5px dashed currentColor;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0 2px;
+  border-radius: 3px;
+  background-color: rgba(255, 255, 255, 0.7);
+  transition: all 0.15s ease;
+}
+.glossary-word:active, .glossary-word.active-word {
+  background-color: #1e293b;
+  color: #ffffff !important;
+  border-bottom-color: transparent;
+}
+
+/* Viewport Responsive Scaling Classes for Phone, Tablet, and Auto-Fit */
+#appFrame.mode-phone {
+  max-width: 430px;
+  height: 100dvh;
+}
+@media (min-width: 640px) {
+  #appFrame.mode-phone {
+    height: 94dvh;
+    max-height: 840px;
+  }
+}
+
+#appFrame.mode-tablet {
+  max-width: 820px;
+  height: 100dvh;
+}
+@media (min-width: 640px) {
+  #appFrame.mode-tablet {
+    height: 94dvh;
+    max-height: 940px;
+  }
+}
+
+#appFrame.mode-auto {
+  max-width: 430px;
+  height: 100dvh;
+}
+@media (min-width: 640px) {
+  #appFrame.mode-auto {
+    max-width: 540px;
+    height: 94dvh;
+    max-height: 860px;
+  }
+}
+@media (min-width: 768px) {
+  #appFrame.mode-auto {
+    max-width: 740px;
+    height: 93dvh;
+    max-height: 920px;
+  }
+}
+@media (min-width: 1024px) {
+  #appFrame.mode-auto {
+    max-width: 450px;
+    height: 94dvh;
+    max-height: 850px;
+  }
+}
+
+/* Tablet typography & spacing enhancements when frame is wide */
+#appFrame.is-wide-view #articleTitle {
+  font-size: 16px;
+}
+#appFrame.is-wide-view #articleText {
+  font-size: 13.8px;
+  line-height: 1.48;
+}
+#appFrame.is-wide-view #questionText {
+  font-size: 14.5px;
+  line-height: 1.35;
+}
+#appFrame.is-wide-view .option-btn {
+  font-size: 13px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+#appFrame.is-wide-view #optionsList {
+  gap: 6px;
+}
+</style>
+</head>
+<body class="flex items-start sm:items-center justify-center w-full min-h-[100dvh] bg-slate-900 relative">
+
+<!-- ========================================================================== -->
+<!-- FLOATING DEVICE DIMENSION SWITCHER (Subtle top-right pill on larger screens)-->
+<!-- ========================================================================== -->
+<div id="deviceSwitcherBar" class="hidden sm:flex fixed top-3 right-3 z-30 items-center gap-1 bg-slate-800/90 backdrop-blur-md border border-slate-700/80 rounded-full px-2 py-1 shadow-lg text-[10.5px] text-slate-300 no-select">
+  <span class="text-slate-400 font-semibold px-1.5">View:</span>
+  <button onclick="setViewportMode('auto')" id="vpBtn-auto" class="px-2 py-0.5 rounded-full font-bold transition bg-indigo-600 text-white">Auto Fit</button>
+  <button onclick="setViewportMode('phone')" id="vpBtn-phone" class="px-2 py-0.5 rounded-full font-bold transition hover:text-white">Phone</button>
+  <button onclick="setViewportMode('tablet')" id="vpBtn-tablet" class="px-2 py-0.5 rounded-full font-bold transition hover:text-white">Tablet</button>
+</div>
+
+<!-- Discreet Admin Lock Trigger in Bottom-Right Corner (Invisible to casual users, accessible to teacher) -->
+<button onclick="openAdminGate()" title="Administrator Access" aria-label="Administrator Access" class="fixed bottom-2 right-2 z-30 w-6 h-6 rounded-full bg-slate-800/40 hover:bg-slate-800 text-slate-500 hover:text-slate-200 flex items-center justify-center transition opacity-35 hover:opacity-100">
+  <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+  </svg>
+</button>
+
+<!-- ========================================================================== -->
+<!-- LAYER 1: USER-FACING FRONT-END DISPLAY (Identical look & behavior)         -->
+<!-- ========================================================================== -->
+<div id="appFrame" class="mode-auto relative w-full min-h-[540px] bg-white sm:rounded-3xl sm:shadow-2xl sm:border-[5px] sm:border-slate-800 flex flex-col overflow-y-auto overflow-x-hidden transition-all duration-300 no-select">
+  
+  <!-- ================= TOP HALF: ARTICLE SECTION (46% height, scrollable text) ================= -->
+  <section id="topHalf" class="h-[46%] min-h-[235px] w-full flex flex-col justify-between border-b-2 relative overflow-hidden select-none transition-colors duration-300 shrink-0">
+    <!-- Ultra-Compact Top Navigation Bar -->
+    <header id="topHeader" class="px-2.5 py-1 text-white flex items-center justify-between shrink-0 shadow-sm transition-colors duration-300">
+      <button id="prevArticleBtn" onclick="changeArticle(-1)" aria-label="Previous Story" class="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 active:scale-95 flex items-center justify-center transition">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="flex items-center gap-2">
+        <!-- Triple-clicking the brand title also opens the Admin Login Gate -->
+        <span id="brandHeaderTitle" onclick="handleHeaderSecretTap()" class="text-xs font-extrabold tracking-tight cursor-pointer">Junior News Reading Exercise</span>
+        <!-- Story Progress Dots inline to save vertical space -->
+        <div id="articleDots" class="flex items-center gap-1"></div>
+      </div>
+      <button id="nextArticleBtn" onclick="changeArticle(1)" aria-label="Next Story" class="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 active:scale-95 flex items-center justify-center transition">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </header>
+
+    <!-- Article Header, Scrollable Body & Compact Glossary Bar -->
+    <div id="articleContainer" class="flex-1 px-3 py-1 flex flex-col justify-between min-h-0 overflow-hidden">
+      <!-- Compact Category Badge, Icon & Title Row -->
+      <div class="shrink-0 mb-0.5">
+        <div class="flex items-center justify-between gap-1.5">
+          <div class="flex items-center gap-1.5 min-w-0">
+            <div id="articleEmoji" class="w-6 h-6 rounded-lg border flex items-center justify-center text-sm shrink-0 bg-white/85"></div>
+            <h1 id="articleTitle" class="text-[13px] font-extrabold text-slate-800 leading-tight truncate"></h1>
+          </div>
+          <span id="articleCategory" class="inline-flex items-center text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border shrink-0"></span>
+        </div>
+        <div class="flex items-center justify-between mt-0.5">
+          <p id="articleByline" class="text-[9.5px] text-slate-600 truncate font-medium"></p>
+          <span id="storySwipeHint" class="text-[9px] font-semibold flex items-center gap-0.5 opacity-75 shrink-0">
+            ↔ Swipe story
+          </span>
+        </div>
+      </div>
+
+      <!-- Scrollable Article Paragraphs (Tight line-height & padding, scrolls if needed) -->
+      <div id="articleText" class="custom-scroll flex-1 overflow-y-auto pr-1 text-[11.8px] leading-[1.32] text-slate-800 space-y-1 my-0.5"></div>
+
+      <!-- Compact Interactive Glossary Bar -->
+      <div id="glossaryBar" class="shrink-0 bg-white/90 border rounded-lg px-2 py-1 flex items-center justify-between gap-1.5 min-h-[24px]">
+        <div class="flex items-center gap-1.5 min-w-0 flex-1">
+          <span id="glossaryBadge" class="text-[8.5px] font-extrabold uppercase tracking-wider text-white px-1.5 py-0.5 rounded shrink-0">Word</span>
+          <p id="glossaryContent" class="text-[10.5px] text-slate-700 truncate font-medium">
+            Tap a <span class="font-bold underline decoration-dashed">highlighted word</span> for its meaning!
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= BOTTOM HALF: QUIZ & REVIEW SECTION (54% height, scrollable options) ================= -->
+  <section id="bottomHalf" class="h-[54%] min-h-[280px] flex-1 w-full flex flex-col justify-between px-3 py-1.5 relative overflow-hidden select-none transition-colors duration-300">
+    <!-- Compact Top Row of Bottom Half: Question Tabs (Q1-Q4) & Skill/Score Indicator -->
+    <div class="flex items-center justify-between gap-1 shrink-0 pb-1 border-b border-black/5">
+      <!-- Interactive Q1 - Q4 Pill Tabs -->
+      <div id="questionTabs" class="flex items-center gap-1"></div>
+      <!-- Skill Badge OR Score Badge after submission -->
+      <div class="flex items-center gap-1">
+        <span id="questionSkillTag" class="text-[9.5px] font-bold px-1.5 py-0.5 rounded border"></span>
+        <button id="summaryToggleBtn" onclick="toggleSummaryModal()" class="hidden text-[9.5px] font-extrabold px-2 py-0.5 rounded bg-slate-800 text-white hover:bg-slate-700 active:scale-95 transition">
+          All 4 Key
+        </button>
+      </div>
+    </div>
+
+    <!-- Scrollable Question & Options Container -->
+    <div id="questionSwipeArea" class="custom-scroll flex-1 overflow-y-auto pr-0.5 py-1 flex flex-col justify-start gap-1.5 min-h-0">
+      <!-- Question Prompt -->
+      <div id="questionCard" class="shrink-0">
+        <h2 id="questionText" class="text-[12.2px] sm:text-[12.8px] font-bold text-slate-800 leading-[1.28]"></h2>
+      </div>
+      <!-- 4 Multiple Choice Options (Compact height so all 4 fit easily) -->
+      <div id="optionsList" class="grid grid-cols-1 gap-1 shrink-0"></div>
+    </div>
+
+    <!-- Pinned Bottom Action Bar: Prev/Next Question + Submit Answers Button -->
+    <div class="flex items-center justify-between gap-1.5 pt-1 shrink-0 border-t border-black/10 bg-inherit z-10">
+      <button id="prevQBtn" onclick="changeQuestion(-1)" class="px-2 py-1 rounded-lg bg-white/90 hover:bg-white border border-slate-300/90 text-slate-700 font-bold text-[10.5px] flex items-center gap-0.5 active:scale-95 transition disabled:opacity-35 disabled:pointer-events-none shrink-0">
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        Prev
+      </button>
+      <!-- Dynamic Center Action Button: Submit Answers OR Post-Submit Status -->
+      <div class="flex-1 flex items-center justify-center min-w-0">
+        <button id="submitQuizBtn" onclick="submitCurrentStory()" disabled class="w-full py-1 px-2.5 rounded-lg font-extrabold text-[11px] tracking-tight shadow-sm transition-all flex items-center justify-center gap-1 disabled:bg-slate-200 disabled:text-slate-400 disabled:border disabled:border-slate-300/80 disabled:shadow-none active:scale-95 truncate">
+          <span>Answer all 4 (0/4)</span>
+        </button>
+      </div>
+      <button id="nextQBtn" onclick="changeQuestion(1)" class="px-2 py-1 rounded-lg bg-white/90 hover:bg-white border border-slate-300/90 text-slate-700 font-bold text-[10.5px] flex items-center gap-0.5 active:scale-95 transition disabled:opacity-35 disabled:pointer-events-none shrink-0">
+        Next
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+    <!-- COMPACT OVERLAY MODAL: All 4 Correct Answers Overview -->
+    <div id="summaryOverlay" class="hidden absolute inset-0 bg-white/95 backdrop-blur-xs z-20 px-3 py-2 flex-col justify-between anim-fade overflow-hidden">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-1 shrink-0">
+        <div>
+          <h3 id="overlayScoreTitle" class="text-[11.5px] font-extrabold text-slate-800">Answer Key Summary</h3>
+          <p class="text-[9.5px] text-slate-500">Tap any question to inspect it</p>
+        </div>
+        <div class="flex items-center gap-1">
+          <button onclick="retryArticle()" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] transition">
+            Retry
+          </button>
+          <button onclick="toggleSummaryModal(false)" class="px-2 py-0.5 rounded bg-slate-800 text-white font-bold text-[10px] transition">
+            Close
+          </button>
+        </div>
+      </div>
+      <div id="overlayList" class="custom-scroll flex-1 overflow-y-auto grid grid-cols-1 gap-1 my-1 pr-0.5"></div>
+      <div class="flex items-center justify-between pt-1 border-t border-slate-200 shrink-0">
+        <span class="text-[9.5px] text-slate-400 font-semibold">Swipe top half for next story</span>
+        <button onclick="changeArticle(1)" class="px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-bold text-[10.5px] flex items-center gap-1">
+          Next Story →
+        </button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ========================================================================== -->
+<!-- LAYER 2: RESTRICTED ADMIN LOGIN MODAL                                      -->
+<!-- ========================================================================== -->
+<div id="adminLoginModal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm items-center justify-center p-4">
+  <div class="w-full max-w-md bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl p-6 text-white anim-fade">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-base font-extrabold tracking-tight">Administrator Sign In</h2>
+          <p class="text-xs text-slate-400">Restricted Back-End Content Management</p>
+        </div>
+      </div>
+      <button onclick="closeAdminGate()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+        ✕
+      </button>
+    </div>
+
+    <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" class="space-y-4">
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Login Name (Email)</label>
+        <input id="adminEmailInput" type="email" required autocomplete="username" placeholder="Enter administrator email" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
+      </div>
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Password</label>
+        <input id="adminPasswordInput" type="password" required autocomplete="current-password" placeholder="Enter password" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
+      </div>
+      <div id="adminLoginError" class="hidden px-3 py-2 rounded-lg bg-rose-950/90 border border-rose-700 text-rose-200 text-xs font-semibold">
+        Invalid login name or password. Access denied.
+      </div>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button type="button" onclick="closeAdminGate()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
+          Cancel
+        </button>
+        <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold shadow-lg shadow-indigo-600/30 transition">
+          Sign In to Back-End
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ========================================================================== -->
+<!-- LAYER 3: ADMINISTRATIVE BACK-END CMS (5 Articles x 4 Questions Editor)     -->
+<!-- ========================================================================== -->
+<div id="adminBackendView" class="hidden fixed inset-0 z-40 bg-slate-950 text-slate-100 flex-col overflow-hidden">
+  <!-- Sticky Top Admin Header Bar -->
+  <header class="bg-slate-900 border-b border-slate-800 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 shrink-0 shadow-md">
+    <div class="flex items-center gap-3">
+      <span class="px-2.5 py-1 rounded-lg bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-extrabold uppercase tracking-wider">
+        Admin CMS
+      </span>
+      <div>
+        <h1 class="text-sm sm:text-base font-extrabold text-white">Junior News Reading Exercise • Back-End Editor</h1>
+        <p class="text-[11px] text-slate-400">Logged in as <span class="text-indigo-300 font-semibold">wonghauchun@gmail.com</span> <span id="cloudSyncBadge" class="ml-1.5 px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px]">Ready</span></p>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2">
+      <button type="button" onclick="loadCurrentArticlesIntoAdmin()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold transition">
+        Load Current Live Set
+      </button>
+      <button type="button" onclick="clearAllAdminFields()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-rose-950/60 border border-slate-700 hover:border-rose-700/60 text-slate-300 hover:text-rose-200 text-xs font-semibold transition">
+        Clear All Boxes
+      </button>
+      <button type="button" onclick="downloadUpdatedHtmlFile()" class="px-3 py-1.5 rounded-lg bg-emerald-950/80 hover:bg-emerald-900/80 border border-emerald-700/60 text-emerald-200 text-xs font-semibold transition flex items-center gap-1" title="Download standalone updated index.html for GitHub">
+        <span>⬇ Export GitHub HTML</span>
+      </button>
+      <button type="button" onclick="exitAdminToFrontEnd()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition">
+        View Front-End
+      </button>
+      <button type="button" onclick="logoutAdmin()" class="px-3 py-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/40 text-rose-300 text-xs font-bold transition">
+        Log Out
+      </button>
+    </div>
+  </header>
+
+  <!-- Quick Section Navigation Bar + Completion Status Banner -->
+  <div class="bg-slate-900/70 border-b border-slate-800/80 px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-2 shrink-0">
+    <div class="flex items-center gap-1.5 overflow-x-auto py-0.5">
+      <span class="text-[11px] font-bold text-slate-400 mr-1">Jump to:</span>
+      <button type="button" onclick="scrollToAdminSection(0)" id="adminNavTab-0" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">Article 1</button>
+      <button type="button" onclick="scrollToAdminSection(1)" id="adminNavTab-1" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">Article 2</button>
+      <button type="button" onclick="scrollToAdminSection(2)" id="adminNavTab-2" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">Article 3</button>
+      <button type="button" onclick="scrollToAdminSection(3)" id="adminNavTab-3" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">Article 4</button>
+      <button type="button" onclick="scrollToAdminSection(4)" id="adminNavTab-4" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">Article 5</button>
+    </div>
+    <div id="adminValidationSummary" class="text-xs font-semibold text-amber-300">
+      Checking fields...
+    </div>
+  </div>
+
+  <!-- Toast Banner inside Admin -->
+  <div id="adminToastBanner" class="hidden bg-emerald-600 text-white px-4 py-2 text-xs font-bold text-center shrink-0"></div>
+
+  <!-- Main Scrollable 5 Sections Container -->
+  <div id="adminSectionsScroll" class="custom-scroll flex-1 overflow-y-auto p-4 sm:p-6 space-y-8">
+    <div id="adminSectionsContainer" class="max-w-5xl mx-auto space-y-8 pb-12"></div>
+  </div>
+
+  <!-- Sticky Bottom Action Bar with the strict 'Update' Button -->
+  <footer class="bg-slate-900 border-t border-slate-800 px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0 shadow-2xl">
+    <div class="text-xs text-slate-400 text-center sm:text-left">
+      <span id="updateRequirementHint">Fill in all 5 articles, 20 questions, 80 choices, and check 1 correct answer per question to activate <strong class="text-white">Update</strong>.</span>
+    </div>
+    <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+      <button id="adminUpdateBtn" type="button" onclick="handleAdminUpdate()" disabled class="w-full sm:w-auto min-w-[200px] px-6 py-2.5 rounded-xl font-extrabold text-sm tracking-wide transition-all flex items-center justify-center gap-2 disabled:bg-slate-800 disabled:text-slate-500 disabled:border disabled:border-slate-700 disabled:cursor-not-allowed bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 cursor-pointer">
+        <span>Update</span>
+      </button>
+    </div>
+  </footer>
+</div>
+
+<!-- ========================================================================== -->
+<!-- APPLICATION LOGIC + FIREBASE CLOUD PERSISTENCE                             -->
+<!-- ========================================================================== -->
+<script>
+// ============================================================================
+// 5 DISTINCT VISUAL COLOUR THEMES (Preserved for the 5 Articles)
+// ============================================================================
+const STORY_THEMES = [
+  {
+    topBg: "#e0f2fe",
+    bottomBg: "#f0f9ff",
+    borderColor: "#bae6fd",
+    headerGrad: "linear-gradient(90deg, #0284c7 0%, #2563eb 100%)",
+    accentHex: "#0284c7",
+    badgeBg: "#bae6fd",
+    badgeText: "#0369a1",
+    wordColor: "#0369a1",
+    defaultCategory: "TECH & GADGETS • STORY 01",
+    defaultEmoji: "📱",
+    defaultByline: "Reported by: Goodies Staff Reporter"
+  },
+  {
+    topBg: "#f3e8ff",
+    bottomBg: "#faf5ff",
+    borderColor: "#e9d5ff",
+    headerGrad: "linear-gradient(90deg, #7e22ce 0%, #6d28d9 100%)",
+    accentHex: "#7e22ce",
+    badgeBg: "#e9d5ff",
+    badgeText: "#6b21a8",
+    wordColor: "#6b21a8",
+    defaultCategory: "SCIENCE & HISTORY • STORY 02",
+    defaultEmoji: "🔬",
+    defaultByline: "Reported by: Goodies Science Desk"
+  },
+  {
+    topBg: "#dcfce7",
+    bottomBg: "#f0fdf4",
+    borderColor: "#bbf7d0",
+    headerGrad: "linear-gradient(90deg, #059669 0%, #0d9488 100%)",
+    accentHex: "#059669",
+    badgeBg: "#bbf7d0",
+    badgeText: "#065f46",
+    wordColor: "#065f46",
+    defaultCategory: "LOCAL SPORTS • STORY 03",
+    defaultEmoji: "🤺",
+    defaultByline: "Reported by: Goodies Sports Desk"
+  },
+  {
+    topBg: "#fef3c7",
+    bottomBg: "#fffbeb",
+    borderColor: "#fde68a",
+    headerGrad: "linear-gradient(90deg, #d97706 0%, #ea580c 100%)",
+    accentHex: "#d97706",
+    badgeBg: "#fde68a",
+    badgeText: "#92400e",
+    wordColor: "#92400e",
+    defaultCategory: "NATURE & ENVIRONMENT • STORY 04",
+    defaultEmoji: "🌼",
+    defaultByline: "Reported by: Goodies Nature Desk"
+  },
+  {
+    topBg: "#ffe4e6",
+    bottomBg: "#fff1f2",
+    borderColor: "#fecdd3",
+    headerGrad: "linear-gradient(90deg, #e11d48 0%, #db2777 100%)",
+    accentHex: "#e11d48",
+    badgeBg: "#fecdd3",
+    badgeText: "#9f1239",
+    wordColor: "#9f1239",
+    defaultCategory: "READER'S CORNER • STORY 05",
+    defaultEmoji: "💝",
+    defaultByline: "Reported by: Goodies Reader's Corner"
+  }
+];
+
+// ============================================================================
+// INITIAL DEFAULT ARTICLES & QUIZ DATA (Identical to uploaded index.html)
+// ============================================================================
+/*__ARTICLES_DATA_START__*/
+let articles = [
+  {
+    id: 1,
+    category: "TECH & GADGETS • STORY 01",
+    title: "New iPhone Has Screen Problems",
+    byline: "Reported by: Goodies Staff Reporter",
+    emoji: "📱",
+    theme: STORY_THEMES[0],
+    paragraphs: [
+      "Apple <span class='glossary-word' data-word='released'>released</span> its first <span class='glossary-word' data-word='foldable'>foldable</span> phone, the iPhone Duo, on 23 October. Many fans were very excited. It is Apple's most <span class='glossary-word' data-word='expensive'>expensive</span> phone, costing between HK$17,000 and HK$28,000.",
+      "However, just days later, many buyers <span class='glossary-word' data-word='complained'>complained</span> on social media that their new screens were broken. Some users saw a thick line across the inside screen. Others heard clicking sounds when they folded and unfolded the phone a few times.",
+      "A few lucky buyers got new phones from Apple stores. However, unlucky users may need to pay up to HK$9,000 to fix the broken screen."
+    ],
+    glossary: {
+      released: "Made available for people to buy.",
+      foldable: "Able to bend neatly in half.",
+      expensive: "Costing a large amount of money.",
+      complained: "Said they were unhappy with something."
+    },
+    questions: [
+      {
+        skill: "Inference",
+        q: "How did the buyers' feelings about the iPhone Duo change after a few days?",
+        options: [
+          "From angry to excited",
+          "From excited to disappointed",
+          "From worried to happy",
+          "From bored to surprised"
+        ],
+        correct: 1
+      },
+      {
+        skill: "Calculation & Inference",
+        q: "What is the MOST money an unlucky buyer might spend in total if they buy the cheapest iPhone Duo and pay the highest price to fix its screen once?",
+        options: [
+          "HK$17,000",
+          "HK$26,000",
+          "HK$28,000",
+          "HK$37,000"
+        ],
+        correct: 1
+      },
+      {
+        skill: "Synonym",
+        q: "\"Apple released its first foldable phone...\" Which word can best replace \"released\" without changing the meaning?",
+        options: [
+          "Launched",
+          "Dropped",
+          "Fixed",
+          "Hid"
+        ],
+        correct: 0
+      },
+      {
+        skill: "Inference",
+        q: "Why does the writer call some buyers \"lucky\" in the last paragraph?",
+        options: [
+          "Their phones never had any screen problems.",
+          "They bought the phone for only HK$9,000.",
+          "They got a free replacement phone without paying for repairs.",
+          "They won a free phone on social media."
+        ],
+        correct: 2
+      }
+    ]
+  },
+  {
+    id: 2,
+    category: "SCIENCE & HISTORY • STORY 02",
+    title: "Louis Pasteur and Germs",
+    byline: "Reported by: Goodies Science Desk",
+    emoji: "🔬",
+    theme: STORY_THEMES[1],
+    paragraphs: [
+      "Louis Pasteur was a famous French <span class='glossary-word' data-word='scientist'>scientist</span> who loved asking questions. Long ago, people did not know that tiny <span class='glossary-word' data-word='germs'>germs</span> could make them sick. Pasteur <span class='glossary-word' data-word='discovered'>discovered</span> that germs made drinks like milk go bad, and realised they could also cause illnesses in humans.",
+      "To keep milk safe to drink, Pasteur <span class='glossary-word' data-word='invented'>invented</span> a heating method to kill harmful germs. We still use this method today. His work also helped doctors keep hospitals clean and make operations safer.",
+      "Later, Pasteur created a medicine to stop rabies, a deadly sickness from animal bites. In 1885, he used it to save a boy who was bitten by a dog. Pasteur's work helped millions of people stay healthy."
+    ],
+    glossary: {
+      scientist: "A person who studies science.",
+      germs: "Tiny living things causing sickness.",
+      discovered: "Found out something for the first time.",
+      invented: "Created something new and useful."
+    },
+    questions: [
+      {
+        skill: "Inference",
+        q: "Based on the article, what did people think BEFORE Louis Pasteur's discoveries?",
+        options: [
+          "They knew boiling milk killed germs.",
+          "They did not know that tiny living things caused illnesses.",
+          "They believed all animal bites were safe.",
+          "They thought hospitals were already completely clean."
+        ],
+        correct: 1
+      },
+      {
+        skill: "Vocabulary Nuance",
+        q: "Why did the writer say Pasteur \"discovered\" germs, but \"invented\" the heating method?",
+        options: [
+          "Both words mean the exact same thing.",
+          "Germs were made by Pasteur, while the heating method was found in nature.",
+          "Germs already lived in nature, while the heating method was made by him.",
+          "Discovering is only for medicine, and inventing is only for food."
+        ],
+        correct: 2
+      },
+      {
+        skill: "Synonym",
+        q: "In paragraph 3, rabies is described as a \"deadly\" sickness. Which word has the closest meaning to \"deadly\"?",
+        options: [
+          "Mild",
+          "Fatal",
+          "Common",
+          "Painful"
+        ],
+        correct: 1
+      },
+      {
+        skill: "Inference",
+        q: "Which everyday activity today is a direct result of Louis Pasteur's invention in paragraph 2?",
+        options: [
+          "Walking a pet dog in the park",
+          "Asking questions in a science lesson",
+          "Buying safe cartons of fresh milk from a supermarket",
+          "Taking medicine for a headache"
+        ],
+        correct: 2
+      }
+    ]
+  },
+  {
+    id: 3,
+    category: "LOCAL SPORTS • STORY 03",
+    title: "Rewards for Hong Kong Athletes",
+    byline: "Reported by: Goodies Sports Desk",
+    emoji: "🤺",
+    theme: STORY_THEMES[2],
+    paragraphs: [
+      "The Hong Kong Jockey Club will give HK$5.5 million to <span class='glossary-word' data-word='local'>local</span> <span class='glossary-word' data-word='medal'>medal</span> winners from the 5th Asian Para Games. The Games took place in Japan from 18 to 24 October.",
+      "Eighty Hong Kong <span class='glossary-word' data-word='athletes'>athletes</span> joined ten sports and won 41 medals in total. These included three gold, 14 silver, and 24 bronze medals. Wheelchair fencer Alison Yu won six of the eight fencing medals. The Club gave these cash prizes to <span class='glossary-word' data-word='celebrate'>celebrate</span> the athletes' hard work and great results."
+    ],
+    glossary: {
+      local: "Belonging to our own city or area.",
+      medal: "A metal prize won in a contest.",
+      athletes: "People trained to compete in sports.",
+      celebrate: "To praise and honour a success."
+    },
+    questions: [
+      {
+        skill: "Inference & Math",
+        q: "How many fencing medals were won by Hong Kong athletes OTHER than Alison Yu?",
+        options: [
+          "Two",
+          "Six",
+          "Eight",
+          "Thirty-five"
+        ],
+        correct: 0
+      },
+      {
+        skill: "Inference",
+        q: "What can we infer about the athletes in the Asian Para Games?",
+        options: [
+          "They only compete in wheelchair fencing.",
+          "They all come from Japan.",
+          "They are athletes with physical disabilities who compete in sports.",
+          "Every athlete won at least one cash prize."
+        ],
+        correct: 2
+      },
+      {
+        skill: "Word Group",
+        q: "\"Gold, silver, and bronze\" are mentioned together. Which word group best describes these three words before they are made into medals?",
+        options: [
+          "Types of sports",
+          "Types of metals",
+          "Types of money",
+          "Types of games"
+        ],
+        correct: 1
+      },
+      {
+        skill: "Antonym / Opposite",
+        q: "The Hong Kong Jockey Club will give cash prizes to \"local\" medal winners. Which phrase has the OPPOSITE meaning to \"local\"?",
+        options: [
+          "From our own city",
+          "From a nearby neighbourhood",
+          "From another country",
+          "From the same sports team"
+        ],
+        correct: 2
+      }
+    ]
+  },
+  {
+    id: 4,
+    category: "NATURE & ENVIRONMENT • STORY 04",
+    title: "The Fried Egg Tree",
+    byline: "Reported by: Goodies Nature Desk",
+    emoji: "🌼",
+    theme: STORY_THEMES[3],
+    paragraphs: [
+      "The fried egg tree, also called the Hong Kong Gordonia, is a special local plant. It gets its funny <span class='glossary-word' data-word='nickname'>nickname</span> because its white and yellow flowers look just like fried sunny-side-up eggs!",
+      "This strong tree can grow up to eight metres tall, even in poor soil on hillsides. Its pretty flowers <span class='glossary-word' data-word='bloom'>bloom</span> best in September and October. After blooming, the flowers fall onto the ground and still keep their egg shape.",
+      "The fried egg tree is very important to Hong Kong's nature. Since 2009, the government has planted many of these trees in the countryside. They help <span class='glossary-word' data-word='replace'>replace</span> <span class='glossary-word' data-word='foreign'>foreign</span> plants, make the soil healthy, and protect local wildlife."
+    ],
+    glossary: {
+      nickname: "A playful or informal extra name.",
+      bloom: "To open up and produce flowers.",
+      replace: "To take the place of something.",
+      foreign: "Coming from another country."
+    },
+    questions: [
+      {
+        skill: "Inference",
+        q: "What would you most likely see if you walked under a fried egg tree in October?",
+        options: [
+          "Real eggs hanging from the branches.",
+          "White and yellow flowers both on the branches and on the ground.",
+          "Bare branches with no flowers or leaves at all.",
+          "Farmers planting foreign trees around it."
+        ],
+        correct: 1
+      },
+      {
+        skill: "Inference",
+        q: "In paragraph 2, why does the writer describe the fried egg tree as \"strong\"?",
+        options: [
+          "Its flowers never fall off the branches.",
+          "Animals cannot climb up its trunk.",
+          "It can grow tall even in bad soil on hillsides.",
+          "Its wood is used to build houses in the countryside."
+        ],
+        correct: 2
+      },
+      {
+        skill: "Vocabulary Relationship",
+        q: "The tree is called a \"local\" plant in paragraph 1, and it replaces \"foreign\" plants in paragraph 3. How are the words \"local\" and \"foreign\" related?",
+        options: [
+          "They have the same meaning.",
+          "They have opposite meanings.",
+          "They are both names of flowers.",
+          "One is a verb and the other is a noun."
+        ],
+        correct: 1
+      },
+      {
+        skill: "Word Group",
+        q: "In paragraph 3, the fried egg tree helps protect local \"wildlife\". Which of the following belongs to the word group \"wildlife\"?",
+        options: [
+          "Pet cats and dogs living in flats",
+          "Wild birds and insects living in the countryside",
+          "Rocks and soil on steep hillsides",
+          "Hikers and campers visiting country parks"
+        ],
+        correct: 1
+      }
+    ]
+  },
+  {
+    id: 5,
+    category: "READER'S CORNER • STORY 05",
+    title: "A Lesson in Gratitude",
+    byline: "By Kwan Sui-hang, Maverick (6E) Ming Tao Primary School",
+    emoji: "💝",
+    theme: STORY_THEMES[4],
+    paragraphs: [
+      "Last summer, I wanted McDonald's for breakfast, so I angrily threw away the bread and egg Mum made. Seeing Mum look sad, I quickly said sorry. To teach me a lesson, she took me to do <span class='glossary-word' data-word='volunteer'>volunteer</span> work.",
+      "First, we visited Grandma Lam, a 94-year-old woman living alone in a tiny flat without air conditioning. We gave her lettuce, rice, and cooking oil. Chatting with her taught me how important family is.",
+      "Next, we gave food to <span class='glossary-word' data-word='homeless'>homeless</span> people. Despite heavy rain, we found them under a bridge and shared lunch boxes. Their big smiles made me happy. I felt sorry for being <span class='glossary-word' data-word='selfish'>selfish</span> before. Now, I <span class='glossary-word' data-word='treasure'>treasure</span> my loving family and comfortable home, and I want to volunteer again."
+    ],
+    glossary: {
+      volunteer: "Helping others for free.",
+      homeless: "Having no home to live in.",
+      selfish: "Caring only about oneself.",
+      treasure: "To value something very much."
+    },
+    questions: [
+      {
+        skill: "Inference",
+        q: "Why did Mum take the writer to do volunteer work?",
+        options: [
+          "She wanted the writer to cook breakfast for Grandma Lam.",
+          "She wanted the writer to learn to be thankful for what he had.",
+          "She was too busy to make breakfast at home again.",
+          "She wanted to punish the writer by making him stand in the rain."
+        ],
+        correct: 1
+      },
+      {
+        skill: "Word Group",
+        q: "The writer gave Grandma Lam \"lettuce, rice, and cooking oil\". Which word group best describes all three of these items?",
+        options: [
+          "Fast food snacks",
+          "Kitchen electrical appliances",
+          "Daily groceries",
+          "Restaurant lunch boxes"
+        ],
+        correct: 2
+      },
+      {
+        skill: "Synonym",
+        q: "In paragraph 3, the writer says, \"Now, I treasure my loving family and comfortable home.\" Which word has the closest meaning to \"treasure\" here?",
+        options: [
+          "Hide",
+          "Cherish",
+          "Spend",
+          "Forget"
+        ],
+        correct: 1
+      },
+      {
+        skill: "Inference",
+        q: "Based on the story, what can we infer about Grandma Lam's life in the summer?",
+        options: [
+          "She enjoys eating McDonald's every morning.",
+          "Her flat must feel very hot and lonely.",
+          "She often goes under the bridge to meet friends.",
+          "She has many family members living with her."
+        ],
+        correct: 1
+      }
+    ]
+  }
+];
+/*__ARTICLES_DATA_END__*/
+
+// ============================================================================
+// FRONT-END STATE MANAGEMENT
+// ============================================================================
+let currentArticleIdx = 0;
+let currentQuestionIndices = [0, 0, 0, 0, 0];
+let userAnswers = articles.map(() => [null, null, null, null]);
+let storySubmitted = [false, false, false, false, false];
+const letters = ["A", "B", "C", "D"];
+let currentViewportMode = "auto";
+
+// Admin Authentication State
+const ADMIN_LOGIN_NAME = "wonghauchun@gmail.com";
+const ADMIN_PASSWORD_VAL = "abc123ABC";
+let isAdminAuthenticated = false;
+let secretTapCount = 0;
+let secretTapTimer = null;
+
+// ============================================================================
+// DEVICE DIMENSION / VIEWPORT MODE ADAPTABILITY (Phone / Tablet / Auto Fit)
+// ============================================================================
+function setViewportMode(mode) {
+  currentViewportMode = mode;
+  const frame = document.getElementById("appFrame");
+  frame.classList.remove("mode-auto", "mode-phone", "mode-tablet");
+  frame.classList.add(`mode-${mode}`);
+
+  ["auto", "phone", "tablet"].forEach(m => {
+    const btn = document.getElementById(`vpBtn-${m}`);
+    if (!btn) return;
+    if (m === mode) {
+      btn.className = "px-2 py-0.5 rounded-full font-bold transition bg-indigo-600 text-white";
+    } else {
+      btn.className = "px-2 py-0.5 rounded-full font-bold transition hover:text-white text-slate-300";
+    }
+  });
+  updateFrameResponsiveClass();
+}
+
+function updateFrameResponsiveClass() {
+  const frame = document.getElementById("appFrame");
+  if (!frame) return;
+  const width = frame.getBoundingClientRect().width;
+  if (width >= 520) {
+    frame.classList.add("is-wide-view");
+  } else {
+    frame.classList.remove("is-wide-view");
+  }
+}
+
+window.addEventListener("resize", updateFrameResponsiveClass);
+
+// ============================================================================
+// FRONT-END RENDERING FUNCTIONS
+// ============================================================================
+function renderAll(articleAnim = "fade", questionAnim = "fade") {
+  applyStoryTheme();
+  renderTopNavigation();
+  renderArticle(articleAnim);
+  renderBottomSection(questionAnim);
+  updateFrameResponsiveClass();
+}
+
+function applyStoryTheme() {
+  const art = articles[currentArticleIdx];
+  const t = art.theme || STORY_THEMES[currentArticleIdx % STORY_THEMES.length];
+  const topHalf = document.getElementById("topHalf");
+  const bottomHalf = document.getElementById("bottomHalf");
+  const topHeader = document.getElementById("topHeader");
+  const categoryBadge = document.getElementById("articleCategory");
+  const emojiBox = document.getElementById("articleEmoji");
+  const glossaryBar = document.getElementById("glossaryBar");
+  const glossaryBadge = document.getElementById("glossaryBadge");
+  const swipeHint = document.getElementById("storySwipeHint");
+
+  topHalf.style.backgroundColor = t.topBg;
+  topHalf.style.borderColor = t.borderColor;
+  bottomHalf.style.backgroundColor = t.bottomBg;
+  topHeader.style.background = t.headerGrad;
+
+  categoryBadge.style.backgroundColor = t.badgeBg;
+  categoryBadge.style.color = t.badgeText;
+  categoryBadge.style.borderColor = t.borderColor;
+  swipeHint.style.color = t.badgeText;
+  emojiBox.style.borderColor = t.borderColor;
+  glossaryBar.style.borderColor = t.borderColor;
+  glossaryBadge.style.backgroundColor = t.accentHex;
+}
+
+function renderTopNavigation() {
+  const dotsContainer = document.getElementById("articleDots");
+  dotsContainer.innerHTML = "";
+  articles.forEach((art, idx) => {
+    const isSubmitted = storySubmitted[idx];
+    const dot = document.createElement("button");
+    dot.setAttribute("aria-label", `Go to Story ${idx + 1}`);
+    dot.onclick = () => jumpToArticle(idx);
+
+    if (idx === currentArticleIdx) {
+      dot.className = "w-5 h-2 rounded-full bg-white transition-all shadow-xs";
+    } else if (isSubmitted) {
+      dot.className = "w-2 h-2 rounded-full bg-emerald-300 hover:bg-white transition-all";
+    } else {
+      dot.className = "w-2 h-2 rounded-full bg-white/45 hover:bg-white/75 transition-all";
+    }
+    dotsContainer.appendChild(dot);
+  });
+}
+
+function renderArticle(direction) {
+  const art = articles[currentArticleIdx];
+  const t = art.theme || STORY_THEMES[currentArticleIdx % STORY_THEMES.length];
+  const container = document.getElementById("articleContainer");
+  container.classList.remove("anim-left", "anim-right", "anim-fade");
+  void container.offsetWidth;
+  container.classList.add(
+    direction === "next" ? "anim-right" : direction === "prev" ? "anim-left" : "anim-fade"
+  );
+
+  document.getElementById("articleCategory").textContent = art.category || t.defaultCategory;
+  document.getElementById("articleEmoji").textContent = art.emoji || t.defaultEmoji;
+  document.getElementById("articleTitle").textContent = art.title;
+  document.getElementById("articleByline").textContent = art.byline || t.defaultByline;
+
+  const textEl = document.getElementById("articleText");
+  textEl.innerHTML = (art.paragraphs || []).map(p => `<p>${p}</p>`).join("");
+
+  const glossaryBar = document.getElementById("glossaryBar");
+  const glossaryContent = document.getElementById("glossaryContent");
+  const wordSpans = textEl.querySelectorAll(".glossary-word");
+
+  if (wordSpans.length > 0 && art.glossary && Object.keys(art.glossary).length > 0) {
+    glossaryBar.classList.remove("hidden");
+    glossaryContent.innerHTML = `Tap any <span style="color:${t.wordColor}" class="font-bold underline decoration-dashed">highlighted word</span> above for its meaning!`;
+    wordSpans.forEach(span => {
+      span.style.color = t.wordColor;
+      span.addEventListener("click", (e) => {
+        e.stopPropagation();
+        wordSpans.forEach(s => s.classList.remove("active-word"));
+        span.classList.add("active-word");
+        const key = span.getAttribute("data-word");
+        const meaning = art.glossary[key];
+        if (meaning) {
+          glossaryContent.innerHTML = `<strong style="color:${t.wordColor}" class="uppercase text-[10px] mr-1">${key}:</strong> ${meaning}`;
+        }
+      });
+    });
+  } else {
+    glossaryBar.classList.remove("hidden");
+    glossaryContent.innerHTML = `Read the passage carefully and answer the <span style="color:${t.wordColor}" class="font-bold">4 questions</span> below.`;
+  }
+}
+
+function renderBottomSection(questionAnim = "fade") {
+  const art = articles[currentArticleIdx];
+  const t = art.theme || STORY_THEMES[currentArticleIdx % STORY_THEMES.length];
+  const qIdx = currentQuestionIndices[currentArticleIdx];
+  const qObj = art.questions[qIdx];
+  const answers = userAnswers[currentArticleIdx];
+  const isSubmitted = storySubmitted[currentArticleIdx];
+
+  const swipeArea = document.getElementById("questionSwipeArea");
+  swipeArea.classList.remove("anim-left", "anim-right", "anim-fade");
+  void swipeArea.offsetWidth;
+  swipeArea.classList.add(
+    questionAnim === "next" ? "anim-right" : questionAnim === "prev" ? "anim-left" : "anim-fade"
+  );
+
+  // 1. Render Q1 - Q4 Tabs
+  const tabsContainer = document.getElementById("questionTabs");
+  tabsContainer.innerHTML = "";
+  for (let i = 0; i < 4; i++) {
+    const btn = document.createElement("button");
+    btn.onclick = () => jumpToQuestion(i);
+    const isCurrent = i === qIdx;
+    const hasAns = answers[i] !== null;
+
+    let statusIcon = "";
+    let baseClasses = "px-1.5 py-0.5 rounded-md text-[10.5px] font-extrabold transition-all flex items-center gap-0.5 border ";
+
+    if (isSubmitted) {
+      const isCorrect = answers[i] === art.questions[i].correct;
+      statusIcon = isCorrect ? "✓" : "✕";
+      if (isCurrent) {
+        baseClasses += isCorrect
+          ? "bg-emerald-600 text-white border-emerald-700 shadow-xs"
+          : "bg-rose-600 text-white border-rose-700 shadow-xs";
+      } else {
+        baseClasses += isCorrect
+          ? "bg-emerald-100 text-emerald-800 border-emerald-300 opacity-85"
+          : "bg-rose-100 text-rose-800 border-rose-300 opacity-85";
+      }
+    } else {
+      if (isCurrent) {
+        baseClasses += "text-white shadow-xs";
+        btn.style.backgroundColor = t.accentHex;
+        btn.style.borderColor = t.accentHex;
+      } else if (hasAns) {
+        baseClasses += "bg-white text-slate-800 border-slate-300";
+        statusIcon = "•";
+      } else {
+        baseClasses += "bg-white/60 text-slate-500 border-slate-200/80";
+      }
+    }
+
+    btn.className = baseClasses;
+    btn.innerHTML = `<span>Q${i + 1}</span>${statusIcon ? `<span class="text-[9.5px]">${statusIcon}</span>` : ""}`;
+    tabsContainer.appendChild(btn);
+  }
+
+  // 2. Skill Tag & All-4 Summary Button
+  const skillTag = document.getElementById("questionSkillTag");
+  const summaryBtn = document.getElementById("summaryToggleBtn");
+
+  if (isSubmitted) {
+    const score = answers.reduce((acc, ans, idx) => acc + (ans === art.questions[idx].correct ? 1 : 0), 0);
+    skillTag.textContent = `Score: ${score}/4`;
+    skillTag.style.backgroundColor = score >= 3 ? "#d1fae5" : "#fef3c7";
+    skillTag.style.color = score >= 3 ? "#065f46" : "#92400e";
+    skillTag.style.borderColor = score >= 3 ? "#6ee7b7" : "#fde68a";
+    summaryBtn.classList.remove("hidden");
+  } else {
+    skillTag.textContent = qObj.skill || `Question ${qIdx + 1}`;
+    skillTag.style.backgroundColor = t.badgeBg;
+    skillTag.style.color = t.badgeText;
+    skillTag.style.borderColor = t.borderColor;
+    summaryBtn.classList.add("hidden");
+    toggleSummaryModal(false);
+  }
+
+  // 3. Question Prompt
+  document.getElementById("questionText").textContent = `${qIdx + 1}. ${qObj.q}`;
+
+  // 4. Render 4 Multiple Choice Options
+  const optionsList = document.getElementById("optionsList");
+  optionsList.innerHTML = "";
+  qObj.options.forEach((optText, optIdx) => {
+    const isSelected = answers[qIdx] === optIdx;
+    const isCorrectOption = qObj.correct === optIdx;
+    const btn = document.createElement("button");
+    let btnClasses = "option-btn w-full text-left px-2.5 py-1 rounded-lg border text-[11.5px] leading-[1.25] font-medium flex items-center justify-between gap-1.5 transition-all ";
+    let badgeClasses = "w-4 h-4 rounded text-[10px] font-extrabold flex items-center justify-center shrink-0 ";
+    let rightTag = "";
+
+    if (!isSubmitted) {
+      btn.onclick = () => selectOption(optIdx);
+      if (isSelected) {
+        btnClasses += "text-white shadow-xs font-semibold active:scale-[0.99]";
+        btn.style.backgroundColor = t.accentHex;
+        btn.style.borderColor = t.accentHex;
+        badgeClasses += "bg-white text-slate-900";
+        rightTag = `<span class="text-[9px] font-bold bg-white/25 px-1 py-0.5 rounded shrink-0">✓</span>`;
+      } else {
+        btnClasses += "bg-white/90 text-slate-700 border-slate-200/90 hover:bg-white active:scale-[0.99]";
+        badgeClasses += "bg-slate-100 text-slate-600";
+      }
+    } else {
+      btn.disabled = true;
+      if (isCorrectOption) {
+        btnClasses += "bg-emerald-50 text-emerald-950 border-emerald-500 font-bold ring-1 ring-emerald-400";
+        badgeClasses += "bg-emerald-600 text-white";
+        rightTag = `<span class="text-[9px] font-extrabold text-emerald-700 bg-emerald-100 px-1 py-0.5 rounded shrink-0">${isSelected ? "✓ Yours" : "✓ Answer"}</span>`;
+      } else if (isSelected && !isCorrectOption) {
+        btnClasses += "bg-rose-50 text-rose-900 border-rose-400 font-semibold";
+        badgeClasses += "bg-rose-600 text-white";
+        rightTag = `<span class="text-[9px] font-extrabold text-rose-700 bg-rose-100 px-1 py-0.5 rounded shrink-0">✕ Yours</span>`;
+      } else {
+        btnClasses += "bg-white/50 text-slate-400 border-slate-200/60 opacity-75";
+        badgeClasses += "bg-slate-100 text-slate-400";
+      }
+    }
+
+    btn.className = btnClasses;
+    btn.innerHTML = `
+      <div class="flex items-center gap-1.5 min-w-0 flex-1">
+        <span class="${badgeClasses}">${letters[optIdx]}</span>
+        <span class="leading-tight break-words"></span>
+      </div>
+      ${rightTag}
+    `;
+    btn.querySelector("span.leading-tight").textContent = optText;
+    optionsList.appendChild(btn);
+  });
+
+  // 5. Bottom Prev Q / Next Q & Submit Button State
+  document.getElementById("prevQBtn").disabled = qIdx === 0;
+  document.getElementById("nextQBtn").disabled = qIdx === 3;
+
+  const answeredCount = answers.filter(a => a !== null).length;
+  const submitBtn = document.getElementById("submitQuizBtn");
+
+  if (!isSubmitted) {
+    if (answeredCount === 4) {
+      submitBtn.disabled = false;
+      submitBtn.style.backgroundColor = t.accentHex;
+      submitBtn.style.borderColor = t.accentHex;
+      submitBtn.className = "w-full py-1 px-2.5 rounded-lg font-extrabold text-[11px] text-white shadow-xs transition-all flex items-center justify-center gap-1 active:scale-95 cursor-pointer";
+      submitBtn.innerHTML = `<span>Submit Answers (4/4)</span><span>✓</span>`;
+    } else {
+      submitBtn.disabled = true;
+      submitBtn.style.backgroundColor = "";
+      submitBtn.style.borderColor = "";
+      submitBtn.className = "w-full py-1 px-2.5 rounded-lg font-bold text-[10.5px] transition-all flex items-center justify-center gap-1 bg-white/70 text-slate-400 border border-slate-300/70";
+      submitBtn.innerHTML = `<span>Answer all 4 (${answeredCount}/4)</span>`;
+    }
+  } else {
+    submitBtn.disabled = false;
+    submitBtn.style.backgroundColor = "#1e293b";
+    submitBtn.style.borderColor = "#1e293b";
+    submitBtn.className = "w-full py-1 px-2.5 rounded-lg font-extrabold text-[10.5px] text-white shadow-xs transition-all flex items-center justify-center gap-1 active:scale-95";
+    submitBtn.innerHTML = `<span>View All 4 Answers</span>`;
+  }
+}
+
+// ============================================================================
+// FRONT-END INTERACTION HANDLERS
+// ============================================================================
+function selectOption(optIdx) {
+  if (storySubmitted[currentArticleIdx]) return;
+  const qIdx = currentQuestionIndices[currentArticleIdx];
+  userAnswers[currentArticleIdx][qIdx] = optIdx;
+  renderBottomSection("fade");
+}
+
+function changeQuestion(delta) {
+  const curQ = currentQuestionIndices[currentArticleIdx];
+  const nextQ = curQ + delta;
+  if (nextQ >= 0 && nextQ < 4) {
+    currentQuestionIndices[currentArticleIdx] = nextQ;
+    renderBottomSection(delta > 0 ? "next" : "prev");
+  }
+}
+
+function jumpToQuestion(idx) {
+  const curQ = currentQuestionIndices[currentArticleIdx];
+  if (idx === curQ) {
+    toggleSummaryModal(false);
+    return;
+  }
+  const dir = idx > curQ ? "next" : "prev";
+  currentQuestionIndices[currentArticleIdx] = idx;
+  toggleSummaryModal(false);
+  renderBottomSection(dir);
+}
+
+function submitCurrentStory() {
+  const answers = userAnswers[currentArticleIdx];
+  if (!storySubmitted[currentArticleIdx]) {
+    if (answers.some(a => a === null)) return;
+    storySubmitted[currentArticleIdx] = true;
+    renderTopNavigation();
+    renderBottomSection("fade");
+    populateSummaryOverlay();
+    toggleSummaryModal(true);
+  } else {
+    populateSummaryOverlay();
+    toggleSummaryModal();
+  }
+}
+
+function populateSummaryOverlay() {
+  const art = articles[currentArticleIdx];
+  const answers = userAnswers[currentArticleIdx];
+  let score = 0;
+  answers.forEach((a, i) => {
+    if (a === art.questions[i].correct) score++;
+  });
+
+  document.getElementById("overlayScoreTitle").textContent = `${art.title} • Score: ${score}/4`;
+  const list = document.getElementById("overlayList");
+  list.innerHTML = "";
+
+  art.questions.forEach((qObj, idx) => {
+    const uAns = answers[idx];
+    const cAns = qObj.correct;
+    const isCorrect = uAns === cAns;
+    const row = document.createElement("button");
+    row.onclick = () => jumpToQuestion(idx);
+    row.className = `w-full text-left px-2 py-1 rounded-lg border text-[10.5px] flex items-center justify-between gap-1.5 transition ${
+      isCorrect ? "bg-emerald-50/90 border-emerald-300" : "bg-rose-50/90 border-rose-300"
+    }`;
+
+    const leftDiv = document.createElement("div");
+    leftDiv.className = "min-w-0 flex-1";
+
+    const qTitleDiv = document.createElement("div");
+    qTitleDiv.className = "font-bold text-slate-800 truncate";
+    qTitleDiv.textContent = `Q${idx + 1}: ${qObj.q}`;
+
+    const ansDiv = document.createElement("div");
+    ansDiv.className = "truncate mt-0.5";
+
+    const yourSpan = document.createElement("span");
+    yourSpan.className = isCorrect ? "text-emerald-700 font-bold" : "text-rose-700 font-semibold";
+    yourSpan.textContent = `You: ${letters[uAns]}) ${qObj.options[uAns]}`;
+    ansDiv.appendChild(yourSpan);
+
+    if (!isCorrect) {
+      const corSpan = document.createElement("span");
+      corSpan.className = "text-emerald-800 font-extrabold ml-1";
+      corSpan.textContent = `• Ans: ${letters[cAns]}) ${qObj.options[cAns]}`;
+      ansDiv.appendChild(corSpan);
+    }
+
+    leftDiv.appendChild(qTitleDiv);
+    leftDiv.appendChild(ansDiv);
+
+    const iconSpan = document.createElement("span");
+    iconSpan.className = `text-xs font-extrabold shrink-0 ${isCorrect ? "text-emerald-700" : "text-rose-700"}`;
+    iconSpan.textContent = isCorrect ? "✓" : "✕";
+
+    row.appendChild(leftDiv);
+    row.appendChild(iconSpan);
+    list.appendChild(row);
+  });
+}
+
+function toggleSummaryModal(forceState) {
+  const overlay = document.getElementById("summaryOverlay");
+  const isHidden = overlay.classList.contains("hidden");
+  const nextState = typeof forceState === "boolean" ? forceState : isHidden;
+
+  if (nextState && storySubmitted[currentArticleIdx]) {
+    populateSummaryOverlay();
+    overlay.classList.remove("hidden");
+    overlay.classList.add("flex");
+  } else {
+    overlay.classList.add("hidden");
+    overlay.classList.remove("flex");
+  }
+}
+
+function retryArticle() {
+  userAnswers[currentArticleIdx] = [null, null, null, null];
+  storySubmitted[currentArticleIdx] = false;
+  currentQuestionIndices[currentArticleIdx] = 0;
+  toggleSummaryModal(false);
+  renderAll("fade", "fade");
+}
+
+function resetAllUserQuizProgress() {
+  currentArticleIdx = 0;
+  currentQuestionIndices = [0, 0, 0, 0, 0];
+  userAnswers = articles.map(() => [null, null, null, null]);
+  storySubmitted = [false, false, false, false, false];
+  toggleSummaryModal(false);
+}
+
+// ============================================================================
+// ZONE-AWARE SWIPE GESTURES
+// ============================================================================
+function changeArticle(delta) {
+  const nextIdx = (currentArticleIdx + delta + articles.length) % articles.length;
+  currentArticleIdx = nextIdx;
+  toggleSummaryModal(false);
+  renderAll(delta > 0 ? "next" : "prev", "fade");
+}
+
+function jumpToArticle(idx) {
+  if (idx === currentArticleIdx) return;
+  const dir = idx > currentArticleIdx ? "next" : "prev";
+  currentArticleIdx = idx;
+  toggleSummaryModal(false);
+  renderAll(dir, "fade");
+}
+
+function attachHorizontalSwipe(element, onSwipeLeft, onSwipeRight) {
+  let startX = 0;
+  let startY = 0;
+  let dragging = false;
+
+  element.addEventListener("touchstart", (e) => {
+    if (e.touches.length === 1) {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    }
+  }, { passive: true });
+
+  element.addEventListener("touchend", (e) => {
+    if (e.changedTouches.length === 1) {
+      const dx = e.changedTouches[0].clientX - startX;
+      const dy = e.changedTouches[0].clientY - startY;
+      if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.8) {
+        if (dx < 0) onSwipeLeft();
+        else onSwipeRight();
+      }
+    }
+  }, { passive: true });
+
+  element.addEventListener("mousedown", (e) => {
+    startX = e.clientX;
+    startY = e.clientY;
+    dragging = true;
+  });
+
+  element.addEventListener("mouseup", (e) => {
+    if (!dragging) return;
+    dragging = false;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+      if (dx < 0) onSwipeLeft();
+      else onSwipeRight();
+    }
+  });
+}
+
+attachHorizontalSwipe(
+  document.getElementById("topHalf"),
+  () => changeArticle(1),
+  () => changeArticle(-1)
+);
+
+attachHorizontalSwipe(
+  document.getElementById("bottomHalf"),
+  () => changeQuestion(1),
+  () => changeQuestion(-1)
+);
+
+// ============================================================================
+// ADMINISTRATIVE ACCESS & LOGIN GATE (wonghauchun@gmail.com / abc123ABC)
+// ============================================================================
+function handleHeaderSecretTap() {
+  secretTapCount++;
+  clearTimeout(secretTapTimer);
+  secretTapTimer = setTimeout(() => {
+    secretTapCount = 0;
+  }, 900);
+  if (secretTapCount >= 3) {
+    secretTapCount = 0;
+    openAdminGate();
+  }
+}
+
+function openAdminGate() {
+  if (isAdminAuthenticated) {
+    showAdminBackend();
+    return;
+  }
+  const modal = document.getElementById("adminLoginModal");
+  document.getElementById("adminLoginError").classList.add("hidden");
+  document.getElementById("adminEmailInput").value = "";
+  document.getElementById("adminPasswordInput").value = "";
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+  setTimeout(() => document.getElementById("adminEmailInput").focus(), 50);
+}
+
+function closeAdminGate() {
+  const modal = document.getElementById("adminLoginModal");
+  modal.classList.add("hidden");
+  modal.classList.remove("flex");
+  if (window.location.hash === "#admin") {
+    history.replaceState(null, "", window.location.pathname + window.location.search);
+  }
+}
+
+function handleAdminLogin(e) {
+  e.preventDefault();
+  const emailVal = document.getElementById("adminEmailInput").value.trim();
+  const passVal = document.getElementById("adminPasswordInput").value;
+
+  if (emailVal === ADMIN_LOGIN_NAME && passVal === ADMIN_PASSWORD_VAL) {
+    isAdminAuthenticated = true;
+    document.getElementById("adminLoginError").classList.add("hidden");
+    closeAdminGate();
+    showAdminBackend();
+  } else {
+    document.getElementById("adminLoginError").classList.remove("hidden");
+  }
+}
+
+function showAdminBackend() {
+  buildAdminFormDOM();
+  loadCurrentArticlesIntoAdmin();
+  const backend = document.getElementById("adminBackendView");
+  backend.classList.remove("hidden");
+  backend.classList.add("flex");
+}
+
+function exitAdminToFrontEnd() {
+  const backend = document.getElementById("adminBackendView");
+  backend.classList.add("hidden");
+  backend.classList.remove("flex");
+  if (window.location.hash === "#admin") {
+    history.replaceState(null, "", window.location.pathname + window.location.search);
+  }
+  renderAll("fade", "fade");
+}
+
+function logoutAdmin() {
+  isAdminAuthenticated = false;
+  exitAdminToFrontEnd();
+}
+
+window.addEventListener("hashchange", () => {
+  if (window.location.hash === "#admin") {
+    openAdminGate();
+  }
+});
+
+// ============================================================================
+// ADMIN BACK-END EDITOR: 5 SECTIONS x (ARTICLE + 4 QUESTIONS x 4 CHOICES + CHECKBOXES)
+// ============================================================================
+function stripHtmlTagsForPlainText(htmlStr) {
+  const temp = document.createElement("div");
+  temp.innerHTML = htmlStr;
+  return temp.textContent || temp.innerText || "";
+}
+
+function buildAdminFormDOM() {
+  const container = document.getElementById("adminSectionsContainer");
+  if (container.children.length === 5) return; // Already built
+  container.innerHTML = "";
+
+  for (let aIdx = 0; aIdx < 5; aIdx++) {
+    const theme = STORY_THEMES[aIdx];
+    const sec = document.createElement("section");
+    sec.id = `adminArticleSec-${aIdx}`;
+    sec.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl space-y-5";
+
+    let questionsHtml = "";
+    for (let qIdx = 0; qIdx < 4; qIdx++) {
+      let choicesHtml = "";
+      for (let cIdx = 0; cIdx < 4; cIdx++) {
+        choicesHtml += `
+          <div class="flex items-center gap-2.5 bg-slate-950/70 border border-slate-800 rounded-xl px-3 py-2 focus-within:border-indigo-500 transition">
+            <label class="flex items-center gap-1.5 cursor-pointer shrink-0 select-none" title="Check this box if Choice ${letters[cIdx]} is the correct answer">
+              <input
+                type="checkbox"
+                id="admin-a${aIdx}-q${qIdx}-check${cIdx}"
+                onchange="handleCorrectCheckboxChange(${aIdx}, ${qIdx}, ${cIdx})"
+                class="w-4 h-4 rounded border-slate-600 text-emerald-500 focus:ring-emerald-500 cursor-pointer accent-emerald-500"
+              />
+              <span class="text-xs font-extrabold px-1.5 py-0.5 rounded bg-slate-800 text-slate-200">${letters[cIdx]}</span>
+            </label>
+            <input
+              type="text"
+              id="admin-a${aIdx}-q${qIdx}-opt${cIdx}"
+              oninput="validateAdminForm()"
+              placeholder="Paste or type Choice ${letters[cIdx]}..."
+              class="w-full bg-transparent text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none"
+            />
+          </div>
+        `;
+      }
+
+      questionsHtml += `
+        <div class="bg-slate-950/50 border border-slate-800/90 rounded-xl p-3.5 sm:p-4 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <label for="admin-a${aIdx}-q${qIdx}-prompt" class="text-xs font-extrabold uppercase tracking-wider text-indigo-400">
+              Article ${aIdx + 1} • Question ${qIdx + 1}
+            </label>
+            <span class="text-[11px] text-slate-400">Check the box next to the correct choice (A, B, C, or D)</span>
+          </div>
+          <input
+            type="text"
+            id="admin-a${aIdx}-q${qIdx}-prompt"
+            oninput="validateAdminForm()"
+            placeholder="Paste or enter Question ${qIdx + 1} prompt..."
+            class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700/90 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+          />
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+            ${choicesHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    sec.innerHTML = `
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="w-8 h-8 rounded-xl flex items-center justify-center text-base font-extrabold text-white shadow" style="background:${theme.headerGrad}">
+            ${aIdx + 1}
+          </span>
+          <div>
+            <h2 class="text-base font-extrabold text-white">Article ${aIdx + 1} Configuration</h2>
+            <p class="text-xs text-slate-400">${theme.defaultCategory}</p>
+          </div>
+        </div>
+        <span id="adminSecStatus-${aIdx}" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400">
+          Incomplete
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="sm:col-span-2">
+          <label for="admin-a${aIdx}-title" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+            Article ${aIdx + 1} Title <span class="text-slate-400 font-normal">(Optional — auto-detected from first line if left blank)</span>
+          </label>
+          <input
+            type="text"
+            id="admin-a${aIdx}-title"
+            oninput="validateAdminForm()"
+            placeholder="e.g., ${articles[aIdx]?.title || `Story ${aIdx + 1} Title`}"
+            class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700/90 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+          />
+        </div>
+        <div>
+          <label for="admin-a${aIdx}-byline" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+            Byline / Source <span class="text-slate-400 font-normal">(Optional)</span>
+          </label>
+          <input
+            type="text"
+            id="admin-a${aIdx}-byline"
+            oninput="validateAdminForm()"
+            placeholder="${theme.defaultByline}"
+            class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700/90 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label for="admin-a${aIdx}-text" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+          Article ${aIdx + 1} Reading Passage Text <span class="text-rose-400">* Required</span>
+        </label>
+        <textarea
+          id="admin-a${aIdx}-text"
+          rows="5"
+          oninput="validateAdminForm()"
+          placeholder="Paste the full text of Article ${aIdx + 1} here (separate paragraphs with a new line)..."
+          class="custom-scroll w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700/90 text-xs sm:text-sm text-white placeholder-slate-500 leading-relaxed focus:outline-none focus:border-indigo-500"
+        ></textarea>
+      </div>
+
+      <div class="space-y-3 pt-1">
+        <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-300">
+          4 Multiple-Choice Questions for Article ${aIdx + 1}
+        </h3>
+        ${questionsHtml}
+      </div>
+    `;
+
+    container.appendChild(sec);
+  }
+}
+
+// Ensure checkboxes per question act as single-select (checking one unchecks the other 3 for that question)
+function handleCorrectCheckboxChange(aIdx, qIdx, selectedCIdx) {
+  const clickedBox = document.getElementById(`admin-a${aIdx}-q${qIdx}-check${selectedCIdx}`);
+  if (clickedBox && clickedBox.checked) {
+    for (let c = 0; c < 4; c++) {
+      if (c !== selectedCIdx) {
+        const otherBox = document.getElementById(`admin-a${aIdx}-q${qIdx}-check${c}`);
+        if (otherBox) otherBox.checked = false;
+      }
+    }
+  }
+  validateAdminForm();
+}
+
+function loadCurrentArticlesIntoAdmin() {
+  buildAdminFormDOM();
+  for (let aIdx = 0; aIdx < 5; aIdx++) {
+    const art = articles[aIdx];
+    if (!art) continue;
+    document.getElementById(`admin-a${aIdx}-title`).value = art.title || "";
+    document.getElementById(`admin-a${aIdx}-byline`).value = art.byline || "";
+    const plainParagraphs = (art.paragraphs || []).map(p => stripHtmlTagsForPlainText(p));
+    document.getElementById(`admin-a${aIdx}-text`).value = plainParagraphs.join("\n\n");
+
+    for (let qIdx = 0; qIdx < 4; qIdx++) {
+      const qObj = art.questions?.[qIdx];
+      document.getElementById(`admin-a${aIdx}-q${qIdx}-prompt`).value = qObj ? qObj.q : "";
+      for (let cIdx = 0; cIdx < 4; cIdx++) {
+        document.getElementById(`admin-a${aIdx}-q${qIdx}-opt${cIdx}`).value = qObj?.options?.[cIdx] ?? "";
+        document.getElementById(`admin-a${aIdx}-q${qIdx}-check${cIdx}`).checked = (qObj?.correct === cIdx);
+      }
+    }
+  }
+  validateAdminForm();
+}
+
+function clearAllAdminFields() {
+  buildAdminFormDOM();
+  for (let aIdx = 0; aIdx < 5; aIdx++) {
+    document.getElementById(`admin-a${aIdx}-title`).value = "";
+    document.getElementById(`admin-a${aIdx}-byline`).value = "";
+    document.getElementById(`admin-a${aIdx}-text`).value = "";
+    for (let qIdx = 0; qIdx < 4; qIdx++) {
+      document.getElementById(`admin-a${aIdx}-q${qIdx}-prompt`).value = "";
+      for (let cIdx = 0; cIdx < 4; cIdx++) {
+        document.getElementById(`admin-a${aIdx}-q${qIdx}-opt${cIdx}`).value = "";
+        document.getElementById(`admin-a${aIdx}-q${qIdx}-check${cIdx}`).checked = false;
+      }
+    }
+  }
+  validateAdminForm();
+}
+
+function scrollToAdminSection(aIdx) {
+  const target = document.getElementById(`adminArticleSec-${aIdx}`);
+  if (target) {
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
+// Validate that ALL 5 article text boxes, ALL 20 questions, ALL 80 choices, and ALL 20 correct checkboxes are filled
+function validateAdminForm() {
+  let completedArticles = 0;
+  let totalMissingItems = 0;
+
+  for (let aIdx = 0; aIdx < 5; aIdx++) {
+    let articleValid = true;
+    const textVal = (document.getElementById(`admin-a${aIdx}-text`)?.value || "").trim();
+    if (!textVal) {
+      articleValid = false;
+      totalMissingItems++;
+    }
+
+    for (let qIdx = 0; qIdx < 4; qIdx++) {
+      const qPrompt = (document.getElementById(`admin-a${aIdx}-q${qIdx}-prompt`)?.value || "").trim();
+      if (!qPrompt) {
+        articleValid = false;
+        totalMissingItems++;
+      }
+
+      let checkedCount = 0;
+      for (let cIdx = 0; cIdx < 4; cIdx++) {
+        const optVal = (document.getElementById(`admin-a${aIdx}-q${qIdx}-opt${cIdx}`)?.value || "").trim();
+        if (!optVal) {
+          articleValid = false;
+          totalMissingItems++;
+        }
+        const isChecked = document.getElementById(`admin-a${aIdx}-q${qIdx}-check${cIdx}`)?.checked;
+        if (isChecked) checkedCount++;
+      }
+
+      if (checkedCount !== 1) {
+        articleValid = false;
+        totalMissingItems++;
+      }
+    }
+
+    const badge = document.getElementById(`adminSecStatus-${aIdx}`);
+    const navTab = document.getElementById(`adminNavTab-${aIdx}`);
+    if (articleValid) {
+      completedArticles++;
+      if (badge) {
+        badge.textContent = "✓ Ready";
+        badge.className = "px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-950 text-emerald-300 border border-emerald-700/70";
+      }
+      if (navTab) {
+        navTab.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-950/90 text-emerald-300 border border-emerald-700/70 transition";
+      }
+    } else {
+      if (badge) {
+        badge.textContent = "Incomplete";
+        badge.className = "px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400";
+      }
+      if (navTab) {
+        navTab.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition";
+      }
+    }
+  }
+
+  const updateBtn = document.getElementById("adminUpdateBtn");
+  const summaryEl = document.getElementById("adminValidationSummary");
+  const hintEl = document.getElementById("updateRequirementHint");
+
+  const allComplete = (completedArticles === 5 && totalMissingItems === 0);
+  if (updateBtn) {
+    updateBtn.disabled = !allComplete;
+  }
+
+  if (summaryEl) {
+    if (allComplete) {
+      summaryEl.textContent = "✓ All 5 Articles & 20 Questions Complete — Ready to Update!";
+      summaryEl.className = "text-xs font-extrabold text-emerald-400";
+    } else {
+      summaryEl.textContent = `${completedArticles} / 5 Articles Complete (${totalMissingItems} required field${totalMissingItems === 1 ? "" : "s"} remaining)`;
+      summaryEl.className = "text-xs font-semibold text-amber-300";
+    }
+  }
+
+  if (hintEl) {
+    if (allComplete) {
+      hintEl.innerHTML = `<span class="text-emerald-400 font-bold">All fields verified!</span> Press <strong class="text-white">Update</strong> to replace the live front-end reading set.`;
+    } else {
+      hintEl.innerHTML = `Fill in all 5 articles, 20 questions, 80 choices, and check 1 correct answer per question to activate <strong class="text-white">Update</strong>.`;
+    }
+  }
+
+  return allComplete;
+}
+
+function collectUpdatedArticlesFromAdmin() {
+  const newArticles = [];
+  for (let aIdx = 0; aIdx < 5; aIdx++) {
+    const theme = STORY_THEMES[aIdx];
+    const prevArt = articles[aIdx] || {};
+    const rawTitle = (document.getElementById(`admin-a${aIdx}-title`).value || "").trim();
+    const rawByline = (document.getElementById(`admin-a${aIdx}-byline`).value || "").trim();
+    const rawText = (document.getElementById(`admin-a${aIdx}-text`).value || "").trim();
+
+    let paragraphs = rawText
+      .split(/\n+/)
+      .map(line => line.trim())
+      .filter(Boolean);
+
+    let finalTitle = rawTitle;
+    if (!finalTitle && paragraphs.length > 1 && paragraphs[0].length < 75) {
+      finalTitle = paragraphs.shift();
+    } else if (!finalTitle) {
+      finalTitle = `Story ${aIdx + 1}`;
+    }
+
+    const questions = [];
+    for (let qIdx = 0; qIdx < 4; qIdx++) {
+      const qPrompt = document.getElementById(`admin-a${aIdx}-q${qIdx}-prompt`).value.trim();
+      const options = [];
+      let correctIdx = 0;
+      for (let cIdx = 0; cIdx < 4; cIdx++) {
+        options.push(document.getElementById(`admin-a${aIdx}-q${qIdx}-opt${cIdx}`).value.trim());
+        if (document.getElementById(`admin-a${aIdx}-q${qIdx}-check${cIdx}`).checked) {
+          correctIdx = cIdx;
+        }
+      }
+      questions.push({
+        skill: prevArt.questions?.[qIdx]?.skill || `Question ${qIdx + 1}`,
+        q: qPrompt,
+        options,
+        correct: correctIdx
+      });
+    }
+
+    newArticles.push({
+      id: aIdx + 1,
+      category: prevArt.category || theme.defaultCategory,
+      title: finalTitle,
+      byline: rawByline || prevArt.byline || theme.defaultByline,
+      emoji: prevArt.emoji || theme.defaultEmoji,
+      theme: theme,
+      paragraphs: paragraphs,
+      glossary: {},
+      questions: questions
+    });
+  }
+  return newArticles;
+}
+
+function showAdminToast(msg) {
+  const toast = document.getElementById("adminToastBanner");
+  if (!toast) return;
+  toast.textContent = msg;
+  toast.classList.remove("hidden");
+  setTimeout(() => {
+    toast.classList.add("hidden");
+  }, 3200);
+}
+
+async function handleAdminUpdate() {
+  if (!validateAdminForm()) return;
+
+  const updatedSet = collectUpdatedArticlesFromAdmin();
+  articles = updatedSet;
+  resetAllUserQuizProgress();
+  renderAll("fade", "fade");
+
+  // Save to cloud if available
+  if (typeof window.saveArticlesToCloud === "function") {
+    await window.saveArticlesToCloud(updatedSet);
+  }
+
+  showAdminToast("✓ Live Reading Set Updated! Switching to User-Facing Display...");
+  setTimeout(() => {
+    exitAdminToFrontEnd();
+  }, 650);
+}
+
+// ============================================================================
+// GITHUB STATIC HOSTING EXPORT UTILITY (Exports updated single-file index.html)
+// ============================================================================
+function downloadUpdatedHtmlFile() {
+  const currentSet = validateAdminForm() ? collectUpdatedArticlesFromAdmin() : articles;
+  const serialized = `let articles = ${JSON.stringify(currentSet, null, 2)};`;
+  const fullHtml = document.documentElement.outerHTML;
+  const replacedHtml = "<!DOCTYPE html>\n" + fullHtml.replace(
+    /\/\*__ARTICLES_DATA_START__\*\/[\s\S]*?\/\*__ARTICLES_DATA_END__\*\//,
+    `/*__ARTICLES_DATA_START__*/\n${serialized}\n/*__ARTICLES_DATA_END__*/`
+  );
+
+  const blob = new Blob([replacedHtml], { type: "text/html;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "index.html";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showAdminToast("Downloaded updated index.html ready to upload/commit to GitHub!");
+}
+
+// Initialize App on Load
+window.addEventListener("DOMContentLoaded", () => {
+  renderAll("fade", "fade");
+  if (window.location.hash === "#admin" || new URLSearchParams(window.location.search).get("admin") === "1") {
+    openAdminGate();
+  }
+});
+</script>
+
+<!-- ========================================================================== -->
+<!-- CLOUD SYNC MODULE (Firebase Firestore for real-time updates across devices)-->
+<!-- ========================================================================== -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+const syncBadge = document.getElementById("cloudSyncBadge");
+
+async function initCloudSync() {
+  try {
+    if (typeof __firebase_config === "undefined" || !__firebase_config) {
+      if (syncBadge) syncBadge.textContent = "GitHub Static Mode";
+      return;
+    }
+
+    const firebaseConfig = JSON.parse(__firebase_config);
+    const appId = typeof __app_id !== "undefined" ? __app_id : "junior-chronicle-app";
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    if (typeof __initial_auth_token !== "undefined" && __initial_auth_token) {
+      await signInWithCustomToken(auth, __initial_auth_token);
+    } else {
+      await signInAnonymously(auth);
+    }
+
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const liveDocRef = doc(db, "artifacts", appId, "public", "data", "readingSets", "liveSet");
+
+    // Listen for real-time updates pushed by the admin
+    onSnapshot(
+      liveDocRef,
+      (snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          if (data && data.articlesJson) {
+            try {
+              const parsed = JSON.parse(data.articlesJson);
+              if (Array.isArray(parsed) && parsed.length === 5) {
+                // Re-attach theme defaults if needed
+                parsed.forEach((art, idx) => {
+                  art.theme = art.theme || STORY_THEMES[idx];
+                });
+                articles = parsed;
+                resetAllUserQuizProgress();
+                renderAll("fade", "fade");
+                if (syncBadge) syncBadge.textContent = "Cloud Synced";
+              }
+            } catch (err) {
+              console.error("Failed to parse cloud reading set:", err);
+            }
+          }
+        }
+      },
+      (err) => {
+        console.error("Cloud listener error:", err);
+      }
+    );
+
+    // Expose cloud save function for the Admin 'Update' button
+    window.saveArticlesToCloud = async (updatedArticles) => {
+      if (!auth.currentUser) return;
+      try {
+        if (syncBadge) syncBadge.textContent = "Saving...";
+        await setDoc(liveDocRef, {
+          articlesJson: JSON.stringify(updatedArticles),
+          updatedAt: Date.now(),
+          updatedBy: auth.currentUser.uid
+        });
+        if (syncBadge) syncBadge.textContent = "Cloud Synced ✓";
+      } catch (err) {
+        console.error("Error saving updated articles to cloud:", err);
+        if (syncBadge) syncBadge.textContent = "Local Updated";
+      }
+    };
+  } catch (e) {
+    console.warn("Running in standalone static mode:", e);
+  }
+}
+
+initCloudSync();
+</script>
+</body>
+</html>
